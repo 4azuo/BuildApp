@@ -1,0 +1,31 @@
+﻿<local:CWindow x:Class="LogDetails"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BuildApp"
+        x:TypeArguments="local:LogDetailsData"
+        mc:Ignorable="d"
+        Title="Log details" Width="1024" Height="768">
+    <Window.Resources>
+        <local:ValueToSizeConv x:Key="ValueToSizeConv"/>
+        <local:ValueToVisibility x:Key="ValueToVisibility"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding Cmd, Converter={StaticResource ValueToSizeConv}, ConverterParameter=32}" MaxHeight="32"/>
+            <RowDefinition Height="{Binding Log, Converter={StaticResource ValueToSizeConv}, ConverterParameter=2*}"/>
+            <RowDefinition Height="{Binding LogError, Converter={StaticResource ValueToSizeConv}, ConverterParameter=1*}"/>
+        </Grid.RowDefinitions>
+        <DockPanel Margin="8,4">
+            <Button DockPanel.Dock="Right" Width="96" Content="Open Build-Dir" Click="OpenBuildDir" Visibility="{Binding DirPath, Converter={StaticResource ValueToVisibility}}" />
+            <TextBox Text="{Binding Cmd}" BorderThickness="0,0,0,1" IsReadOnly="True" Margin="0,0,8,0" />
+        </DockPanel>
+        <GroupBox Header="Log" Grid.Row="1">
+            <TextBox Text="{Binding Log}" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontSize="10"/>
+        </GroupBox>
+        <GroupBox Header="Error" Grid.Row="2">
+            <TextBox Text="{Binding LogError}" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" FontSize="10"/>
+        </GroupBox>
+    </Grid>
+</local:CWindow>
