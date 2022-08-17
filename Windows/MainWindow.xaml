@@ -88,7 +88,16 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <ListView x:Name="lvLog" Background="#E5F4F4F4" ItemsSource="{Binding Log}" DisplayMemberPath="Details1" FontSize="10"/>
-                <ListView x:Name="lvLogError" Grid.Column="1" Background="#E5F4F4F4" ItemsSource="{Binding LogError}" DisplayMemberPath="Details1" FontSize="10"/>
+                <ListView x:Name="lvLogError" Grid.Column="1" Background="#E5F4F4F4" ItemsSource="{Binding LogError}" FontSize="10">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Button Width="60" Content="Rebuild" DockPanel.Dock="Left" Tag="{Binding}" Click="RebuildError"/>
+                                <TextBlock Text="{Binding Details1}"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </Grid>
         </GroupBox>
         <Border Grid.Column="1" Margin="8" Padding="8">

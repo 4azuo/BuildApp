@@ -6,7 +6,6 @@ Imports Microsoft.Win32
 Public Class MainWindow
 #Region "変数"
     Private _searchIndex As Integer = 0
-    Private _builtPrj As New List(Of Project)
     Private _builtRs As New Dictionary(Of Project, BuildResult)
 #End Region
 
@@ -104,10 +103,9 @@ Public Class MainWindow
 
         'lock window
         Me.IsEnabled = False
-        _builtPrj.Clear()
-        _builtRs.Clear()
 
         'clear log
+        _builtRs.Clear()
         WindowData.Log = New ObservableCollection(Of LogObj)
         WindowData.LogError = New ObservableCollection(Of LogObj)
         WindowData.ProjectCountCur = 0
@@ -192,11 +190,11 @@ Public Class MainWindow
             Dim endTime = DateTime.Now
             Dispatcher.BeginInvoke(Sub()
                                        If exitcode = 0 Then
-                                           Dim newlog = New LogObj(prj.Path, prj.Name, prj.Path, $"＝REBUILD：{prj.Name}（{endTime - startTime:mm\:ss}）", logDetails, errDetails)
+                                           Dim newlog = New LogObj(prj.Path, prj.Name, prj.Path, $"＝REBUILD：{prj.Name}（{endTime - startTime:mm\:ss}）", logDetails, errDetails, prj)
                                            WindowData.Log.Add(newlog)
                                            lvLog.ScrollIntoView(newlog)
                                        Else
-                                           Dim newlog = New LogObj(prj.Path, prj.Name, prj.Path, $"＝ERROR：{prj.Name}（{endTime - startTime:mm\:ss}）", logDetails, errDetails)
+                                           Dim newlog = New LogObj(prj.Path, prj.Name, prj.Path, $"＝ERROR：{prj.Name}（{endTime - startTime:mm\:ss}）", logDetails, errDetails, prj)
                                            WindowData.LogError.Add(newlog)
                                            lvLogError.ScrollIntoView(newlog)
                                        End If
@@ -208,7 +206,7 @@ Public Class MainWindow
     Private Function Build(prj As Project) As BuildResult
         SyncLock prj
             'built project?
-            If _builtPrj.Contains(prj) Then Return _builtRs(prj)
+            If _builtRs.ContainsKey(prj) Then Return _builtRs(prj)
 
             Dim startTime As DateTime = DateTime.Now
             Dim exitcode As Integer = -1
@@ -243,15 +241,14 @@ Public Class MainWindow
                 End If
 
                 'log
-                log = New LogObj($"{executer}{params}", prj.Name, prj.Path, $"＝REBUILD：{prj.Name}（{benchmark:mm\:ss}）", logDetails, errDetails)
+                log = New LogObj($"{executer}{params}", prj.Name, prj.Path, $"＝REBUILD：{prj.Name}（{benchmark:mm\:ss}）", logDetails, errDetails, prj)
             Else
                 'error
-                log = New LogObj($"{executer}{params}", prj.Name, prj.Path, $"＝ERROR：{prj.Name}（{benchmark:mm\:ss}）", logDetails, errDetails)
+                log = New LogObj($"{executer}{params}", prj.Name, prj.Path, $"＝ERROR：{prj.Name}（{benchmark:mm\:ss}）", logDetails, errDetails, prj)
             End If
 
             processer.Close()
             Dim rs = New BuildResult(exitcode, benchmark, buildDirPath, log)
-            _builtPrj.Add(prj)
             _builtRs(prj) = rs
             Return rs
         End SyncLock
@@ -366,5 +363,13 @@ Public Class MainWindow
                 End If
             Next
         End If
+    End Sub
+
+    Private Sub RebuildError(sender As Object, e As RoutedEventArgs)
+        Me.IsEnabled = False
+        _builtRs.Clear()
+        WindowData.LogError.Remove(sender.Tag)
+        BuildStart(sender.Tag.Project)
+        Me.IsEnabled = True
     End Sub
 End Class
